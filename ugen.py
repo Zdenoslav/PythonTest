@@ -2,8 +2,9 @@ import argparse
 import io
 import random
 
-
 # read the input files
+
+
 def read_input(input_paths):
 
     lines = []
@@ -52,17 +53,18 @@ def write_output(username, path):
     f.close()
 
 
-# code for a help method
-parser = argparse.ArgumentParser(description='This is my help')
+if __name__ == '__main__':
+    # code for a help method
+    parser = argparse.ArgumentParser(description='This is my help')
 # an argument to add the output file
-parser.add_argument('-o', '--output', type=str,
-                    required=True, help='create an output file')
+    parser.add_argument('-o', '--output', type=str,
+                        required=True, help='create an output file')
 # an argument to add the input files
-parser.add_argument('input_files', type=str, nargs='+',)
-args = parser.parse_args()
+    parser.add_argument('input_files', type=str, nargs='+',)
+    args = parser.parse_args()
 
-lines = read_input(args.input_files)
-username = generate_usernames(lines)
+    lines = read_input(args.input_files)
+    username = generate_usernames(lines)
 
-path = args.output
-write_output(username, path)
+    path = args.output
+    write_output(username, path)
