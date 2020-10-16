@@ -1,0 +1,6 @@
+[
+    {
+        "input": "1234:Jozef:Hurban:Legal\n4567:Milan:Stefanik:Defence\n4563:Jojooo:Murgas:Development",
+        "output": "1234:jhurban:jozef:hurban:legal\n4567:mstefanik:milan:stefanik:defence\n4563:jmurgas:jojooo:murgas:development"
+    }
+]

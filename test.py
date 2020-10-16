@@ -4,14 +4,9 @@ import io
 import argparse
 import os
 import tempfile
+import json
 
-
-# run the ugen.py program and give it the input files
-
-
-# read the output file and see if the data is as expected
-
-
+# why this main?
 if __name__ == '__main__':
     # code for a help method
     parser = argparse.ArgumentParser(description='This is my help')
@@ -19,8 +14,47 @@ if __name__ == '__main__':
     parser.add_argument('test_data', type=str)
     args = parser.parse_args()
 
-    with tempfile.NamedTemporaryFile(mode='w') as f:
-        f.write(args.test_data)
-        f.flush()
+    file = open(args.test_data, 'r')
+    tests = json.load(file)
+    file.close()
 
-        os.system('python3 ugen.py -o output.txt {}'.format(f.name))
+    testsFailed = 0
+    testsSucceeded = 0
+
+    results = []
+
+    for test in tests:
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(test['input'])
+            f.flush()  # and run the test
+            os.system('python3 ugen.py -o output.txt {}'.format(f.name))
+
+            # read the output.txt file
+            file = open('output.txt', 'r')
+            output = file.read()
+            file.close()
+
+            result = {}
+
+            result['input'] = test['input']
+            result['output'] = test['output']
+
+            if test['output'] == output:
+                testsSucceeded += 1
+                result['passed'] = True
+
+            else:
+                print(test['output'])
+                print(output)
+                result['passed'] = False
+                testsFailed += 1
+
+            results.append(result)
+
+    file = open('results.json', 'w')
+    json.dump(results, file, sort_keys=True, indent=4)
+    file.close()
+
+print(results)
+print(testsSucceeded)
+print(testsFailed)

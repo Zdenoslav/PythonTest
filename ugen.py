@@ -12,7 +12,10 @@ def read_input(input_paths):
         # in loop
         f = open(input_path, 'r')
         lines.extend(f.readlines())
+        lines[-1] += '\n'
         f.close()  # end loop  return lines
+
+    lines[-1] = lines[-1][:-1]
 
     return lines
 # generate usernames
@@ -37,7 +40,7 @@ def generate_usernames(lines):
             # start
             username += str(random.randint(0, 9))
         # end
-            usedUsernames.append(username)
+        usedUsernames.append(username)
 
         split.insert(1, username)
         line = ':'.join(split)
@@ -49,7 +52,7 @@ def generate_usernames(lines):
 def write_output(username, path):
 
     f = open(path, 'w')
-    f.write('\n'.join(username).lower())
+    f.write(''.join(username).lower())
     f.close()
 
 
