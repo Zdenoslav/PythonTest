@@ -1,73 +1,87 @@
 import argparse
-import io
-import random
-
-# read the input files
 
 
 def read_input(input_paths):
-
-    lines = []
+    """
+    Read the input files.
+    :param input_paths:
+    :return:
+    """
+    result = []
     for input_path in input_paths:
-        # in loop
-        f = open(input_path, 'r')
-        lines.extend(f.readlines())
-        lines[-1] += '\n'
-        f.close()  # end loop  return lines
+        with open(input_path, 'r') as f:
+            lines = f.read().split('\n')
+            # Check for the empty files
+            if len(lines) == 1 and len(lines[0]) == 0:
+                continue
+            result.extend(lines)
 
-    lines[-1] = lines[-1][:-1]
-
-    return lines
-# generate usernames
-# a list to store the usernames and check if the username already exists
+    return result
 
 
-def generate_usernames(lines):
+def parse_input(lines):
+    """
+    :param lines:
+    :return:
+    """
+    data = []
+    for i in range(len(lines)):
+        contents = lines[i].split(':')
+        # Check if the input if of a correct length
+        if len(contents) != 4:
+            raise ValueError(
+                'Error line {}: Expected 4 values split by \':\''.format(i))
 
-    output = []
+        data.append(contents)
+
+    return data
+
+
+def generate_usernames(data):
+    """
+    generate usernames
+    a list to store the usernames and check if the username already exists
+    :param data:
+    :return:
+    """
     usedUsernames = []
 
-    for line in lines:  # start loop
+    for entry in data:  # start loop
+        fname = entry[1]
+        lname = entry[2]
 
-        split = line.split(':')
+        original_username = fname[0] + lname  # make username
+        username = original_username
+        counter = 1
 
-        fname = split[1]
-        lname = split[2]
+        while username in usedUsernames:
+            username = original_username + str(counter)
+            counter += 1
 
-        username = fname[0] + lname  # make username
-
-        if username in usedUsernames:
-            # start
-            username += str(random.randint(0, 9))
-        # end
         usedUsernames.append(username)
 
-        split.insert(1, username)
-        line = ':'.join(split)
-        output.append(line)  # end loop
-
-    return output
+        entry.insert(1, username)
 
 
-def write_output(username, path):
-
-    f = open(path, 'w')
-    f.write(''.join(username).lower())
-    f.close()
+def write_output(path, data):
+    with open(path, 'w') as f:
+        f.write('\n'.join([':'.join(entry).lower() for entry in data]))
 
 
 if __name__ == '__main__':
-    # code for a help method
-    parser = argparse.ArgumentParser(description='This is my help')
-# an argument to add the output file
-    parser.add_argument('-o', '--output', type=str,
-                        required=True, help='create an output file')
-# an argument to add the input files
-    parser.add_argument('input_files', type=str, nargs='+',)
-    args = parser.parse_args()
+    try:
+        # code for a help method
+        parser = argparse.ArgumentParser(description='This is my help')
+        # an argument to add the output file
+        parser.add_argument('-o', '--output', type=str,
+                            required=True, help='create an output file')
+        # an argument to add the input files
+        parser.add_argument('input_files', type=str, nargs='+', )
+        args = parser.parse_args()
 
-    lines = read_input(args.input_files)
-    username = generate_usernames(lines)
-
-    path = args.output
-    write_output(username, path)
+        lines = read_input(args.input_files)
+        data = parse_input(lines)
+        generate_usernames(data)
+        write_output(args.output, data)
+    except Exception as e:
+        print(str(e))

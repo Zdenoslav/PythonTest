@@ -1,12 +1,68 @@
-import random
-import names
-import io
 import argparse
-import os
-import tempfile
 import json
+import tempfile
 
-# why this main?
+# import two additional subprocesses
+from subprocess import Popen, PIPE
+
+
+def run_test(input):
+    with tempfile.NamedTemporaryFile(mode='w') as prog_in, tempfile.NamedTemporaryFile(mode='r') as prog_out:
+        # save the input into the input file
+        prog_in.write(input)
+        prog_in.flush()
+
+        # and run the test
+        # runs "python3 ugen.py - o outputfile inputfile"
+        # and redirects the prints (stdout and stderr) so that we can read them
+        proc = Popen(['python3', 'ugen.py', '-o',  prog_out.name, prog_in.name],
+                     stdout=PIPE, stderr=PIPE)
+        # read the outputs form prints and erros in code
+        stdout, stderr = proc.communicate()
+        # decode them into normal strings so it's readable
+        stdout, stderr = stdout.decode(), stderr.decode()
+
+        output = prog_out.read()
+
+        return output, stdout, stderr
+
+
+def execute_test(test_data):
+    # run the test
+    output, stdout, stderr = run_test(test_data['input'])
+
+    # save the run information into the config
+    result = {
+        'input': test_data['input'],
+        'actual_output': output,
+        'actual_stdout': stdout,
+        'actual_stderr': stderr
+    }
+
+    passed = True
+
+    # check conditions for whether the test passed
+    if 'wanted_output' in test:
+        # if user defined some wanted output, check if it matches
+        # the actual output
+        result['wanted_output'] = test_data['wanted_output']
+        passed = passed and test_data['wanted_output'] == output
+    if 'wanted_stdout' in test:
+        # is user defined some wanted stdout, check if it matches
+        # the actual stdout
+        result['wanted_stdout'] = test_data['wanted_stdout']
+        passed = passed and test_data['wanted_stdout'] == stdout
+    if 'wanted_stderr' in test:
+        # if user defined some wanted stderr, check if it matches
+        # the actual stderr
+        result['wanted_stderr'] = test_data['wanted_stderr']
+        passed = passed and test_data['wanted_stderr'] == stderr
+
+    # save whether or not the test passed
+    result['passed'] = passed
+    return passed, result
+
+
 if __name__ == '__main__':
     # code for a help method
     parser = argparse.ArgumentParser(description='This is my help')
@@ -14,47 +70,27 @@ if __name__ == '__main__':
     parser.add_argument('test_data', type=str)
     args = parser.parse_args()
 
-    file = open(args.test_data, 'r')
-    tests = json.load(file)
-    file.close()
+    with open(args.test_data, 'r') as f:
+        tests = json.load(f)
 
-    testsFailed = 0
-    testsSucceeded = 0
+    failed = 0
+    succeeded = 0
 
     results = []
 
     for test in tests:
-        with tempfile.NamedTemporaryFile(mode='w') as f:
-            f.write(test['input'])
-            f.flush()  # and run the test
-            os.system('python3 ugen.py -o output.txt {}'.format(f.name))
+        passed, result = execute_test(test)
+        results.append(result)
 
-            # read the output.txt file
-            file = open('output.txt', 'r')
-            output = file.read()
-            file.close()
+        if passed:
+            succeeded += 1
+        else:
+            failed += 1
 
-            result = {}
+    # Write the report with json
+    with open('results.json', 'w') as f:
+        json.dump(results, f, sort_keys=True, indent=4)
 
-            result['input'] = test['input']
-            result['output'] = test['output']
-
-            if test['output'] == output:
-                testsSucceeded += 1
-                result['passed'] = True
-
-            else:
-                print(test['output'])
-                print(output)
-                result['passed'] = False
-                testsFailed += 1
-
-            results.append(result)
-
-    file = open('results.json', 'w')
-    json.dump(results, file, sort_keys=True, indent=4)
-    file.close()
-
-print(results)
-print(testsSucceeded)
-print(testsFailed)
+    # Print the result statement to the console
+    print('Ran {} test. {} Succeeded, {} Failed'.format(
+        (succeeded + failed), succeeded, failed))

@@ -1,3 +1,6 @@
+import names
+import random
+import io
 # create the testing files
 first_names = []
 for i in range(10):
