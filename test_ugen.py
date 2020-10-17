@@ -1,6 +1,7 @@
 import unittest
 import ugen
 import tempfile
+import HtmlTestRunner
 
 # UNIT TESTS
 
@@ -11,8 +12,7 @@ class TestGenerator(unittest.TestCase):
     def test_read_input(self):
         lines = ['hello', 'line two man',
                  'wewaada', 'set fireeeeee to the rain']
-        # adding a temporary file
-        # randomized file
+        # adding a temporary file randomized file
         with tempfile.NamedTemporaryFile(mode='w') as f:
             f.write('\n'.join(lines))
             f.flush()
@@ -88,4 +88,5 @@ class TestGenerator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=HtmlTestRunner.HTMLTestRunner(
+        output='UnitTestReport'))

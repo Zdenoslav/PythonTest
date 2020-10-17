@@ -67,7 +67,9 @@ if __name__ == '__main__':
     # code for a help method
     parser = argparse.ArgumentParser(description='This is my help')
     parser.add_argument('tested_files', type=str, help='create an output file')
-    parser.add_argument('test_data', type=str)
+    parser.add_argument('test_data', type=str, help="put the input data")
+
+   # parser.print_help()
     args = parser.parse_args()
 
     with open(args.test_data, 'r') as f:
