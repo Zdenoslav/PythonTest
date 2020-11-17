@@ -10,7 +10,7 @@ class TestGenerator(unittest.TestCase):
 
     # Testing for one input file
     def test_read_input(self):
-        lines = ['hello', 'line two man',
+        lines = ['hellhhhhho', 'line two man',
                  'wewaada', 'set fireeeeee to the rain']
         # adding a temporary file randomized file
         with tempfile.NamedTemporaryFile(mode='w') as f:
